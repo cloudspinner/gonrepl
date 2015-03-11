@@ -52,18 +52,18 @@ func main() {
 
 	dec := bencode.NewDecoder(conn)
 	for {
-		result := Response{}
-		if err := dec.Decode(&result); err != nil {
+		resp := Response{}
+		if err := dec.Decode(&resp); err != nil {
 			conn.Close()
 			log.Fatal("error decoding response", err)
 		}
-		if result.Ex != "" {
-			fmt.Println(result.Ex)
+		if resp.Ex != "" {
+			fmt.Println(resp.Ex)
 		}
-		if result.Value != "" {
-			fmt.Println(result.Value)
+		if resp.Value != "" {
+			fmt.Println(resp.Value)
 		}
-		if len(result.Status) > 0 && result.Status[0] == "done" {
+		if len(resp.Status) > 0 && resp.Status[0] == "done" {
 			break
 		}
 	}
