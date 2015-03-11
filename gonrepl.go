@@ -27,7 +27,7 @@ func usage() {
 	os.Exit(2)
 }
 
-var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
+var addr = flag.String("a", ":"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
 
 func main() {
 	flag.Usage = usage
