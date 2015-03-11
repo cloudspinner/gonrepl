@@ -23,7 +23,7 @@ type Response struct {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: gonrepl [-p port]\n")
+	fmt.Fprintf(os.Stderr, "usage: gonrepl [-a addr]\n")
 	os.Exit(2)
 }
 
@@ -35,7 +35,7 @@ func main() {
 
 	bytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		log.Fatal("error reading standard input", err)
+		log.Fatal("error reading standard input: ", err)
 	}
 	code := string(bytes)
 	inst := map[string]interface{}{
@@ -45,14 +45,14 @@ func main() {
 
 	conn, err := net.Dial("tcp", *addr)
 	if err != nil {
-		log.Fatal("error connecting to "+*addr, err)
+		log.Fatal("error connecting to "+*addr + ": ", err)
 	}
 	defer conn.Close()
 
 	enc := bencode.NewEncoder(conn)
 	if err := enc.Encode(inst); err != nil {
 		conn.Close()
-		log.Fatal("error writing instruction", err)
+		log.Fatal("error writing instruction: ", err)
 	}
 
 	dec := bencode.NewDecoder(conn)
@@ -60,7 +60,7 @@ func main() {
 		resp := Response{}
 		if err := dec.Decode(&resp); err != nil {
 			conn.Close()
-			log.Fatal("error decoding response", err)
+			log.Fatal("error decoding response: ", err)
 		}
 		if resp.Ex != "" {
 			fmt.Println(resp.Ex)
