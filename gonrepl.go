@@ -13,6 +13,7 @@ import (
 
 type Response struct {
 	Ex     string
+	Out	string
 	Value  string
 	Status []string
 }
@@ -59,6 +60,9 @@ func main() {
 		}
 		if resp.Ex != "" {
 			fmt.Println(resp.Ex)
+		}
+		if resp.Out != "" {
+			fmt.Println(resp.Out)
 		}
 		if resp.Value != "" {
 			fmt.Println(resp.Value)
