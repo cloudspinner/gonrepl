@@ -1,11 +1,14 @@
 package main
 
 import (
-	bencode "code.google.com/p/bencode-go"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
+
+	"github.com/zeebo/bencode"
 )
 
 type Response struct {
@@ -14,71 +17,54 @@ type Response struct {
 	Status []string
 }
 
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: gonrepl [-p port]\n")
+	os.Exit(2)
+}
+
+var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
+
 func main() {
-	args := os.Args
-	if len(args) < 2 {
-		return
-	}
-	nrepl := args[1]
-	code := ""
+	flag.Usage = usage
+	flag.Parse()
 
-	if len(args) == 2 {
-		//code := args[2]
-		b, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		code = string(b)
-	} else if len(args) == 3 {
-		code = args[2]
-	} else {
-		fmt.Println(`
-        Usage:
-        gonrepl host:port code
-        gonrepl host:port code from stdin
-        `)
-		return
-	}
-
-	conn, err := net.Dial("tcp", nrepl)
+	bytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("error reading standard input", err)
 	}
-	defer conn.Close()
-
-	//fmt.Println("marhsalling")
-	instruction := map[string]interface{}{
+	code := string(bytes)
+	inst := map[string]interface{}{
 		"op":   "eval",
 		"code": code,
 	}
-	err = bencode.Marshal(conn, instruction)
+
+	conn, err := net.Dial("tcp", *addr)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("error connecting to "+*addr, err)
+	}
+	defer conn.Close()
+
+	enc := bencode.NewEncoder(conn)
+	if err := enc.Encode(inst); err != nil {
+		conn.Close()
+		log.Fatal("error writing instruction", err)
 	}
 
+	dec := bencode.NewDecoder(conn)
 	for {
 		result := Response{}
-		//fmt.Println("UNmarhsalling")
-		err = bencode.Unmarshal(conn, &result)
-		if err != nil {
-			fmt.Println(err)
-			return
+		if err := dec.Decode(&result); err != nil {
+			conn.Close()
+			log.Fatal("error decoding response", err)
 		}
-		//fmt.Println(result)
 		if result.Ex != "" {
 			fmt.Println(result.Ex)
 		}
-
 		if result.Value != "" {
 			fmt.Println(result.Value)
 		}
-
 		if len(result.Status) > 0 && result.Status[0] == "done" {
-			return
+			break
 		}
-
 	}
 }
