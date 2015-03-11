@@ -22,15 +22,9 @@ type Response struct {
 	Status []string
 }
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "usage: gonrepl [-a addr]\n")
-	os.Exit(2)
-}
-
 var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
 
 func main() {
-	flag.Usage = usage
 	flag.Parse()
 
 	bytes, err := ioutil.ReadAll(os.Stdin)
