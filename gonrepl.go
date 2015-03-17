@@ -17,7 +17,8 @@ import (
 
 type Response struct {
 	Ex     string
-	Out	string
+	Out    string
+	Err    string
 	Value  string
 	Status []string
 }
@@ -39,7 +40,7 @@ func main() {
 
 	conn, err := net.Dial("tcp", *addr)
 	if err != nil {
-		log.Fatal("error connecting to "+*addr + ": ", err)
+		log.Fatal("error connecting to "+*addr+": ", err)
 	}
 	defer conn.Close()
 
@@ -61,6 +62,9 @@ func main() {
 		}
 		if resp.Out != "" {
 			fmt.Println(resp.Out)
+		}
+		if resp.Err != "" {
+			fmt.Println(resp.Err)
 		}
 		if resp.Value != "" {
 			fmt.Println(resp.Value)
