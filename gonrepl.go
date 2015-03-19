@@ -2,6 +2,10 @@
 // writes the result to standard output.  Connects to
 // localhost:$LEIN_REPL_PORT by default. Pass the -a flag to override
 // the default address.
+//
+// Exceptions and captured stderr go to standard error.
+// Values and captured stdout go to standard output.
+// Return with non-zero exit code if there was an evaluation error.
 package main
 
 import (
@@ -50,6 +54,7 @@ func main() {
 		log.Fatal("error writing instruction: ", err)
 	}
 
+	status := 0
 	dec := bencode.NewDecoder(conn)
 	for {
 		resp := Response{}
@@ -58,19 +63,24 @@ func main() {
 			log.Fatal("error decoding response: ", err)
 		}
 		if resp.Ex != "" {
-			fmt.Println(resp.Ex)
-		}
-		if resp.Out != "" {
-			fmt.Println(resp.Out)
+			fmt.Fprint(os.Stderr, resp.Ex)
 		}
 		if resp.Err != "" {
-			fmt.Println(resp.Err)
+			fmt.Fprint(os.Stderr, resp.Err)
+		}
+		if resp.Out != "" {
+			fmt.Print(resp.Out)
 		}
 		if resp.Value != "" {
-			fmt.Println(resp.Value)
+			fmt.Print(resp.Value)
 		}
-		if len(resp.Status) > 0 && resp.Status[0] == "done" {
-			break
+		if len(resp.Status) > 0 {
+			if resp.Status[0] == "done" {
+				break
+			} else if resp.Status[0] == "eval-error" {
+				status = 1
+			}
 		}
 	}
+	os.Exit(status)
 }
