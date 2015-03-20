@@ -69,7 +69,7 @@ func main() {
 			fmt.Fprint(os.Stderr, resp.Err)
 		}
 		if resp.Out != "" {
-			fmt.Print(resp.Out)
+			fmt.Fprint(os.Stderr, resp.Out)
 		}
 		if resp.Value != "" {
 			fmt.Print(resp.Value)
