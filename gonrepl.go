@@ -3,8 +3,8 @@
 // localhost:$LEIN_REPL_PORT by default. Pass the -a flag to override
 // the default address.
 //
-// Exceptions and captured stderr go to standard error.
-// Values and captured stdout go to standard output.
+// Exceptions and captured stderr + stdout go to standard error.
+// Value of the evaluated expression go to standard output.
 // Return with non-zero exit code if there was an evaluation error.
 package main
 
