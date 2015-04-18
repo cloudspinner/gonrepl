@@ -6,6 +6,10 @@
 // Exceptions and captured stderr + stdout go to standard error.
 // Value of the evaluated expression go to standard output.
 // Return with non-zero exit code if there was an evaluation error.
+//
+// TODO:
+// - fall back to .nrepl_port file if LEIN_REPL_PORT is undefined
+// - automatically enclose s-expr with parenthesis if it isn't already
 package main
 
 import (
