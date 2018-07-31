@@ -1,7 +1,7 @@
 package main
 
 import (
-	bencode "code.google.com/p/bencode-go"
+	bencode "github.com/jackpal/bencode-go"
 	"fmt"
 	"io/ioutil"
 	"net"
