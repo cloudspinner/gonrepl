@@ -1,84 +1,90 @@
+// An nREPL client that reads Clojure code from standard input and
+// writes the result to standard output.  Connects to
+// localhost:$LEIN_REPL_PORT by default. Pass the -a flag to override
+// the default address.
+//
+// Exceptions and captured stderr + stdout go to standard error.
+// Value of the evaluated expression go to standard output.
+// Return with non-zero exit code if there was an evaluation error.
+//
+// TODO:
+// - fall back to .nrepl_port file if LEIN_REPL_PORT is undefined
+// - automatically enclose s-expr with parenthesis if it isn't already
 package main
 
 import (
-	bencode "github.com/jackpal/bencode-go"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
+
+	"github.com/zeebo/bencode"
 )
 
 type Response struct {
 	Ex     string
+	Out    string
+	Err    string
 	Value  string
 	Status []string
 }
 
+var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
+
 func main() {
-	args := os.Args
-	if len(args) < 2 {
-		return
-	}
-	nrepl := args[1]
-	code := ""
+	flag.Parse()
 
-	if len(args) == 2 {
-		//code := args[2]
-		b, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		code = string(b)
-	} else if len(args) == 3 {
-		code = args[2]
-	} else {
-		fmt.Println(`
-        Usage:
-        gonrepl host:port code
-        gonrepl host:port code from stdin
-        `)
-		return
-	}
-
-	conn, err := net.Dial("tcp", nrepl)
+	bytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("error reading standard input: ", err)
 	}
-	defer conn.Close()
-
-	//fmt.Println("marhsalling")
-	instruction := map[string]interface{}{
+	code := string(bytes)
+	inst := map[string]interface{}{
 		"op":   "eval",
 		"code": code,
 	}
-	err = bencode.Marshal(conn, instruction)
+
+	conn, err := net.Dial("tcp", *addr)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("error connecting to "+*addr+": ", err)
+	}
+	defer conn.Close()
+
+	enc := bencode.NewEncoder(conn)
+	if err := enc.Encode(inst); err != nil {
+		conn.Close()
+		log.Fatal("error writing instruction: ", err)
 	}
 
+	status := 0
+	dec := bencode.NewDecoder(conn)
 	for {
-		result := Response{}
-		//fmt.Println("UNmarhsalling")
-		err = bencode.Unmarshal(conn, &result)
-		if err != nil {
-			fmt.Println(err)
-			return
+		resp := Response{}
+		if err := dec.Decode(&resp); err != nil {
+			conn.Close()
+			log.Fatal("error decoding response: ", err)
 		}
-		//fmt.Println(result)
-		if result.Ex != "" {
-			fmt.Println(result.Ex)
+		if resp.Ex != "" {
+			fmt.Fprint(os.Stderr, resp.Ex)
 		}
-
-		if result.Value != "" {
-			fmt.Println(result.Value)
+		if resp.Err != "" {
+			fmt.Fprint(os.Stderr, resp.Err)
 		}
-
-		if len(result.Status) > 0 && result.Status[0] == "done" {
-			return
+		if resp.Out != "" {
+			fmt.Fprint(os.Stderr, resp.Out)
 		}
-
+		if resp.Value != "" {
+			fmt.Print(resp.Value)
+		}
+		if len(resp.Status) > 0 {
+			if resp.Status[0] == "done" {
+				break
+			} else if resp.Status[0] == "eval-error" {
+				status = 1
+			}
+		}
 	}
+	os.Exit(status)
 }

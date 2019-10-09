@@ -1,2 +1,2 @@
-github.com/jackpal/bencode-go v0.0.0-20160320203703-8b8d9a9b37fc h1:ipop6RNUkjANzwzFwBiK9Pn0m+nJlFJTilclOsbjAgY=
-github.com/jackpal/bencode-go v0.0.0-20160320203703-8b8d9a9b37fc/go.mod h1:5FSBQ74yhCl5oQ+QxRPYzWMONFnxbL68/23eezsBI5c=
+github.com/zeebo/bencode v1.0.0 h1:zgop0Wu1nu4IexAZeCZ5qbsjU4O1vMrfCrVgUjbHVuA=
+github.com/zeebo/bencode v1.0.0/go.mod h1:Ct7CkrWIQuLWAy9M3atFHYq4kG9Ao/SsY5cdtCXmp9Y=
