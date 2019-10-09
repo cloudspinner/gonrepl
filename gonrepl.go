@@ -24,11 +24,11 @@ import (
 )
 
 type Response struct {
-	Ex     string
-	Out    string
-	Err    string
-	Value  string
-	Status []string
+	Ex     string   `bencode:"ex"`
+	Out    string   `bencode:"out"`
+	Err    string   `bencode:"err"`
+	Value  string   `bencode:"value"`
+	Status []string `bencode:"status"`
 }
 
 var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
@@ -76,7 +76,7 @@ func main() {
 			fmt.Fprint(os.Stderr, resp.Out)
 		}
 		if resp.Value != "" {
-			fmt.Print(resp.Value)
+			fmt.Println(resp.Value)
 		}
 		if len(resp.Status) > 0 {
 			if resp.Status[0] == "done" {
