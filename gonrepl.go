@@ -29,9 +29,15 @@ type Response struct {
 	Err    string   `bencode:"err"`
 	Value  string   `bencode:"value"`
 	Status []string `bencode:"status"`
+
+	NewSession string `bencode:"new-session"` // for clone
 }
 
-var addr = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
+var (
+	addr  = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
+	sid   = flag.String("s", "", "session id")
+	clone = flag.Bool("clone", false, "clone session")
+)
 
 func main() {
 	flag.Parse()
@@ -44,6 +50,15 @@ func main() {
 	inst := map[string]interface{}{
 		"op":   "eval",
 		"code": code,
+	}
+	if *sid != "" {
+		inst["session"] = *sid
+	}
+
+	if *clone {
+		inst = map[string]interface{}{
+			"op": "clone",
+		}
 	}
 
 	conn, err := net.Dial("tcp", *addr)
@@ -77,6 +92,9 @@ func main() {
 		}
 		if resp.Value != "" {
 			fmt.Println(resp.Value)
+		}
+		if resp.NewSession != "" {
+			fmt.Println(resp.NewSession)
 		}
 		if len(resp.Status) > 0 {
 			if resp.Status[0] == "done" {
