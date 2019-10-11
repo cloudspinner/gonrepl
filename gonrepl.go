@@ -37,6 +37,7 @@ var (
 	addr  = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
 	sid   = flag.String("s", "", "session id")
 	clone = flag.Bool("clone", false, "clone session")
+	close = flag.Bool("close", false, "close session")
 )
 
 func main() {
@@ -51,14 +52,19 @@ func main() {
 		"op":   "eval",
 		"code": code,
 	}
-	if *sid != "" {
-		inst["session"] = *sid
-	}
 
 	if *clone {
 		inst = map[string]interface{}{
 			"op": "clone",
 		}
+	} else if *close {
+		inst = map[string]interface{}{
+			"op": "close",
+		}
+	}
+
+	if *sid != "" {
+		inst["session"] = *sid
 	}
 
 	conn, err := net.Dial("tcp", *addr)
