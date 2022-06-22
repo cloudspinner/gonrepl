@@ -30,12 +30,18 @@ type Response struct {
 	Value  string   `bencode:"value"`
 	Status []string `bencode:"status"`
 
-	NewSession string `bencode:"new-session"` // for clone
+	NewSession    string `bencode:"new-session"`    // for clone
+	FormattedCode string `bencode:"formatted-code"` // for format-code
 }
 
 var (
 	addr  = flag.String("a", "localhost:"+os.Getenv("LEIN_REPL_PORT"), "nREPL port")
 	sid   = flag.String("s", "", "session id")
+	op    = flag.String("o", "eval", `operation, possible values are:
+	clone
+	close
+	eval
+	format-code`)
 	clone = flag.Bool("clone", false, "clone session")
 	close = flag.Bool("close", false, "close session")
 )
@@ -43,13 +49,21 @@ var (
 func main() {
 	flag.Parse()
 
+	operation := *op
+	switch operation {
+	case "clone", "close", "eval", "format-code":
+		// do nothing
+	default:
+		log.Fatal("unsupported operation: ", operation)
+	}
+
 	bytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal("error reading standard input: ", err)
 	}
 	code := string(bytes)
 	inst := map[string]interface{}{
-		"op":   "eval",
+		"op":   operation,
 		"code": code,
 	}
 
@@ -101,6 +115,9 @@ func main() {
 		}
 		if resp.NewSession != "" {
 			fmt.Println(resp.NewSession)
+		}
+		if resp.FormattedCode != "" {
+			fmt.Println(resp.FormattedCode)
 		}
 		if len(resp.Status) > 0 {
 			if resp.Status[0] == "done" {
