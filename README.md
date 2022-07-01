@@ -7,14 +7,10 @@ writes the result to standard output.
 
 You need to install https://github.com/nrepl/nrepl
 
-### Binary release
-
-Fetch a binary from https://github.com/cloudspinner/gonrepl/releases/latest
-
 ### Source install
 
 ```bash
-go install github.com/mkmik/gonrepl@latest
+go install github.com/cloudspinner/gonrepl@latest
 ```
 
 ## Usage
