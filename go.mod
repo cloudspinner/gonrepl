@@ -1,4 +1,4 @@
-module github.com/mkmik/gonrepl
+module github.com/cloudspinner/gonrepl
 
 go 1.13
 

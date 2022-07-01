@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mkmik/gonrepl/client"
+	"github.com/cloudspinner/gonrepl/client"
 )
 const (
 	portEnv     = "LEIN_REPL_PORT"
