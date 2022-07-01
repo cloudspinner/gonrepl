@@ -1,5 +1,5 @@
 An nREPL client that reads Clojure code from standard input and
-writes the result to standard output. 
+writes the result to standard output.
 
 ## Installation
 
@@ -9,9 +9,9 @@ You need to install https://github.com/nrepl/nrepl
 
 ### Binary release
 
-Fetch a binary from https://github.com/mkmik/gonrepl/releases/latest
+Fetch a binary from https://github.com/cloudspinner/gonrepl/releases/latest
 
-### Source install 
+### Source install
 
 ```bash
 go install github.com/mkmik/gonrepl@latest
