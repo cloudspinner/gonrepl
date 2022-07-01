@@ -23,6 +23,7 @@ import (
 
 	"github.com/cloudspinner/gonrepl/client"
 )
+
 const (
 	portEnv     = "LEIN_REPL_PORT"
 	defaultHost = "localhost:"
@@ -161,7 +162,6 @@ func main() {
 	if _, ok := err.(client.EvalErr); ok {
 		os.Exit(1)
 	}
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(2)
-	}
+	fmt.Fprint(os.Stderr, err)
+	os.Exit(2)
 }
